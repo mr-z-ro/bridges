@@ -1,0 +1,101 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <style>
+      body {
+        margin: 0px;
+        padding: 0px;
+        background: #000;
+      }
+    </style>
+  </head>
+  <body>
+    
+    <div style="text-align: center;">
+      <label for="vol">vol:</label> <input id="vol" type="text" value="8" style="width: 18px;" />
+	  <label for="frq">frq:</label> <input id="frq" type="text" value="1" style="width: 18px;" /><br />
+	  <canvas id="b" width="1000" height="600"></canvas><br />
+    </div>
+    
+    <script>
+      /* Declare globals */
+      var cvs = document.getElementById('b');
+      var ctx = cvs.getContext('2d');
+      var ctrX = cvs.width / 2;
+      var ctrY = cvs.height / 2;
+      var l = 800;
+      var layers = 40;
+      var bridges = [];
+
+      /* Draw it */
+      initialize();
+      //updateFrame();
+      setInterval(updateFrame, 25);
+      
+      /* Bridge object */
+      function bridge(n,scolor,fcolor,thk)
+	  {
+		this.n = n;
+		this.stretchiness = (layers-n)/300;
+		this.scolor = scolor;
+		this.fcolor = fcolor;
+		this.thk = thk;
+	  }
+	  
+	  function initialize()
+	  {
+	    for (var i=1; i<=layers; i++) {
+	      var multiplier = i/layers;
+	      var darkcolor = 16767215 * multiplier;
+	      var lightcolor = 16727215 * multiplier;
+	      bridges.push(new bridge(i, '#' + darkcolor.toString(16), '#' + lightcolor.toString(16), 4));
+	    }
+	  }
+      
+      function updateFrame()
+      {
+      	var t_ms = new Date().getMilliseconds();
+      	var t_s = t_ms/1000.00;
+      	var vol = document.getElementById("vol").value;
+      	var frq = document.getElementById("frq").value*2*Math.PI/2; // cycles every 2 sec
+		
+		cvs.width = cvs.width;
+		
+//         ctx.beginPath();
+//         ctx.moveTo(ctrX-l/2, ctrY-l/4);
+//         ctx.lineTo(ctrX-l/2, ctrY+l/8);
+//         ctx.lineWidth = 2;
+//         ctx.stroke();
+//         
+//         ctx.beginPath();
+//         ctx.moveTo(ctrX+l/2, ctrY-l/4);
+//         ctx.lineTo(ctrX+l/2, ctrY+l/8);
+//         ctx.lineWidth = 2;
+//         ctx.stroke();
+          
+        for (i in bridges) {
+          var b = bridges[i];
+          var amp = vol*b.stretchiness*2*l/3;
+          
+          ctx.beginPath();
+          ctx.moveTo(ctrX-l/2, ctrY);
+          ctx.strokeStyle = b.scolor;
+          ctx.fillStyle = b.fcolor;
+          ctx.lineWidth = b.thk;
+          ctx.quadraticCurveTo(ctrX, ctrY + amp * Math.abs(Math.sin(frq*t_s)), ctrX+l/2, ctrY);
+          ctx.stroke();
+          ctx.fill();
+          
+          ctx.beginPath();
+          ctx.moveTo(ctrX-l/2, ctrY);
+          ctx.strokeStyle = b.scolor;
+          ctx.fillStyle = b.fcolor;
+          ctx.lineWidth = b.thk;
+          ctx.quadraticCurveTo(ctrX, ctrY - amp * Math.abs(Math.sin(frq*t_s)), ctrX+l/2, ctrY);
+          ctx.stroke();
+          ctx.fill();
+        }
+      }
+    </script>
+  </body>
+</html>

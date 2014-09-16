@@ -1,0 +1,109 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <style>
+      body {
+        margin: 0px;
+        padding: 0px;
+        background: #000;
+      }
+    </style>
+  </head>
+  <body>
+    
+    <div style="text-align: center;">
+      <label for="vol">vol:</label> <input id="vol" type="hidden" value="8" style="width: 18px;" />
+	  <label for="frq">frq:</label> <input id="frq" type="hidden" value="1" style="width: 18px;" /><br />
+	  <canvas id="b" width="800" height="700"></canvas><br />
+    </div>
+    
+    <script>
+      /* Declare globals */
+      var cvs = document.getElementById('b');
+      var ctx = cvs.getContext('2d');
+      var ctrX = cvs.width / 2;
+      var ctrY = cvs.height / 2;
+      var l = 600;
+      var layers = 80;
+      var bridges = [];
+
+      /* Draw it */
+      initialize();
+      //updateFrame();
+      setInterval(updateFrame, 25);
+      
+      /* Bridge object */
+      function bridge(n,scolor,fcolor,thk)
+	  {
+		this.n = n;
+		this.stretchiness = (layers-n)/300;
+		this.scolor = scolor;
+		this.fcolor = fcolor;
+		this.thk = thk;
+	  }
+	  
+	  function initialize()
+	  {
+	    for (var i=1; i<=layers; i++) {
+	      var multiplier = i/layers;
+	      var darkcolor = (16765215 - (i*10000)) * multiplier;
+	      var lightcolor = (16727215 - (i*10000)) * multiplier;
+	      bridges.push(new bridge(i, '#' + darkcolor.toString(16), '#' + lightcolor.toString(16), 4));
+	    }
+	  }
+      
+      function updateFrame()
+      {
+      	var t_ms = new Date().getMilliseconds();
+      	var t_s = t_ms/1000.00;
+      	var vol = document.getElementById("vol").value;
+      	var frq = document.getElementById("frq").value*2*Math.PI/2; // cycles every 2 sec
+		
+		cvs.width = cvs.width;
+		
+		ctx.translate(ctrX,ctrY);
+		ctx.rotate(Math.PI/2);
+		ctx.translate(-ctrX,-ctrY);
+		
+//         ctx.beginPath();
+//         ctx.moveTo(ctrX-l/2, ctrY-l/4);
+//         ctx.lineTo(ctrX-l/2, ctrY+l/8);
+//         ctx.lineWidth = 2;
+//         ctx.stroke();
+//         
+//         ctx.beginPath();
+//         ctx.moveTo(ctrX+l/2, ctrY-l/4);
+//         ctx.lineTo(ctrX+l/2, ctrY+l/8);
+//         ctx.lineWidth = 2;
+//         ctx.stroke();
+        for (i in bridges) {
+          l = layers/i * 200;
+          ctx.rotate(0+i/(layers*200*t_s));
+          var b = bridges[i];
+          var amp = vol*b.stretchiness*l;
+          
+          b.scolor = '#' + ((16765215 - (t_s*100)) * i/layers).toString(16);
+		  b.fcolor = '#' + ((16727215 - (t_s*200000)) * i/layers).toString(16);
+          
+          ctx.beginPath();
+          ctx.moveTo(ctrX-l/2, ctrY);
+          ctx.strokeStyle = b.scolor;
+          ctx.fillStyle = b.fcolor;
+          ctx.lineWidth = b.thk;
+          ctx.quadraticCurveTo(ctrX, ctrY + amp * Math.abs(Math.sin(frq*t_s/10)), ctrX+l/2, ctrY);
+          ctx.stroke();
+          ctx.fill();
+          
+          ctx.beginPath();
+          ctx.moveTo(ctrX-l/2, ctrY);
+          ctx.strokeStyle = b.scolor;
+          ctx.fillStyle = b.fcolor;
+          ctx.lineWidth = b.thk;
+          ctx.quadraticCurveTo(ctrX, ctrY - amp * Math.abs(Math.sin(frq*t_s)/40), ctrX+l/2, ctrY);
+          ctx.stroke();
+          ctx.fill();
+        }
+      }
+    </script>
+  </body>
+</html>

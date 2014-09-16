@@ -1,0 +1,84 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <style>
+      body {
+        margin: 0px;
+        padding: 0px;
+      }
+    </style>
+  </head>
+  <body>
+    
+    <div style="text-align: center;">
+	  <canvas id="b" width="500" height="500"></canvas><br />
+	  <label for="vol">vol:</label> <input id="vol" type="text" value="5" style="width: 18px;" />
+	  <label for="frq">frq:</label> <input id="frq" type="text" value="5" style="width: 18px;" />
+    </div>
+    
+    <script>
+      /* Declare globals */
+      var cvs = document.getElementById('b');
+      var ctx = cvs.getContext('2d');
+      var ctrX = cvs.width / 2;
+      var ctrY = cvs.height / 2;
+      var l = 400;
+      var bridges = [];
+
+      /* Draw it */
+      initialize();
+      //updateFrame();
+      setInterval(updateFrame, 30);
+      
+      /* Bridge object */
+      function bridge(n,scolor,fcolor,thk)
+	  {
+		this.n = n;
+		this.scolor = scolor;
+		this.fcolor = fcolor;
+		this.thk = thk;
+	  }
+	  
+	  function initialize()
+	  {
+	    bridges.push(new bridge(3, "#781C28", "#CC3D39", 4));
+	    bridges.push(new bridge(2, "#395D00", "#4E8100", 4));
+	    bridges.push(new bridge(1, "#132EDA", "#2846F4", 4));
+	    bridges.push(new bridge(0, "black", "black", 4));
+	  }
+      
+      function updateFrame()
+      {
+      	var ms = new Date().getMilliseconds();
+      	var vol = document.getElementById("vol").value;
+      	var frq = document.getElementById("frq").value;
+		
+		cvs.width = cvs.width;
+		
+		ctx.beginPath();
+        ctx.moveTo(ctrX-l/2, ctrY-l/2);
+        ctx.lineTo(ctrX-l/2, ctrY+l/4);
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        ctx.beginPath();
+        ctx.moveTo(ctrX+l/2, ctrY-l/2);
+        ctx.lineTo(ctrX+l/2, ctrY+l/4);
+        ctx.lineWidth = 2;
+        ctx.stroke();
+          
+        for (i in bridges) {
+          var b = bridges[i];
+          ctx.beginPath();
+          ctx.moveTo(ctrX-l/2, ctrY);
+          ctx.strokeStyle = b.scolor;
+          ctx.fillStyle = b.fcolor;
+          ctx.lineWidth = b.thk;
+          ctx.quadraticCurveTo(ctrX, ctrY + Math.abs(Math.sin(frq*ms/5000 * Math.PI)) * vol*b.n/60 * l, ctrX+l/2, ctrY);
+          ctx.stroke();
+          ctx.fill();
+        }
+      }
+    </script>
+  </body>
+</html>
